@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProofPass — Blockchain Certificate Verification</title>
+  <meta name="description" content="Decentralized, tamper-proof academic and professional certificate registry powered by Ethereum smart contracts and SHA-256 cryptographic hashing." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+  <div class="bg-glow bg-glow-3"></div>
+
+  <div class="app-container">
+    <!-- Navigation / Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>ProofPass</h1>
+          <span class="brand-tag">On-Chain Credential Protocol</span>
+        </div>
+      </div>
+
+      <div class="header-status">
+        <div class="status-chip" id="api-status-chip">
+          <span class="status-dot pulsing"></span>
+          <span class="status-label" id="api-status-text">API Online (8000)</span>
+        </div>
+        <div class="status-chip contract-chip" id="contract-chip" title="CertificateRegistry Address">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="18" height="18" x="3" y="3" rx="2"/>
+            <path d="M7 7h10M7 12h10M7 17h10"/>
+          </svg>
+          <span class="mono" id="contract-address">0x5FbD...aa3</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Top Highlight Banners -->
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon metric-cyan">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="metric-info">
+          <span class="metric-title">Consensus Network</span>
+          <span class="metric-value">Hardhat Local (EVM)</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon metric-purple">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24"/></svg>
+        </div>
+        <div class="metric-info">
+          <span class="metric-title">Integrity Engine</span>
+          <span class="metric-value">Canonical SHA-256</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon metric-green">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
+        </div>
+        <div class="metric-info">
+          <span class="metric-title">Verification Type</span>
+          <span class="metric-value">QR & On-Chain Proofs</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs-nav" aria-label="Main Navigation">
+      <button class="tab-btn active" id="tab-register-btn" data-tab="register">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Register Certificate</span>
+      </button>
+      <button class="tab-btn" id="tab-verify-btn" data-tab="verify">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>Verify & Tamper Check</span>
+      </button>
+      <button class="tab-btn" id="tab-lookup-btn" data-tab="lookup">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Public ID & QR</span>
+      </button>
+      <button class="tab-btn" id="tab-revoke-btn" data-tab="revoke">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        <span>Revocation</span>
+      </button>
+    </nav>
+
+    <!-- Tab 1: Register Certificate -->
+    <main class="tab-content active" id="pane-register">
+      <div class="content-split">
+        <div class="card glass form-card">
+          <div class="card-header">
+            <div>
+              <h2>Mint & Register Certificate</h2>
+              <p class="card-subtitle">Hashes canonical certificate metadata and writes the cryptographic fingerprint to the blockchain.</p>
+            </div>
+            <button type="button" class="btn-ghost" id="btn-fill-sample-reg">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Auto Fill Sample
+            </button>
+          </div>
+
+          <form id="form-register">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="reg-cert-id">Certificate ID *</label>
+                <input type="text" id="reg-cert-id" required placeholder="e.g. CERT-2026-001" />
+              </div>
+              <div class="form-group">
+                <label for="reg-issue-date">Issue Date *</label>
+                <input type="date" id="reg-issue-date" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="reg-student-name">Student Full Name *</label>
+              <input type="text" id="reg-student-name" required placeholder="e.g. Sayan Roy" />
+            </div>
+
+            <div class="form-group">
+              <label for="reg-course-name">Course / Credential Title *</label>
+              <input type="text" id="reg-course-name" required placeholder="e.g. Advanced Blockchain Architecture & Smart Contracts" />
+            </div>
+
+            <div class="form-group">
+              <label for="reg-issuer">Issuing Organization *</label>
+              <input type="text" id="reg-issuer" required placeholder="e.g. ProofPass Certification Authority" />
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="btn-submit-register">
+                <span class="btn-spinner hidden" id="spinner-register"></span>
+                <span class="btn-text">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  Register On Blockchain
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Result / Receipt Display -->
+        <div class="card glass result-card" id="reg-result-card">
+          <div class="card-header">
+            <h3>Registration Receipt</h3>
+            <span class="badge badge-idle" id="reg-badge">Waiting For Submission</span>
+          </div>
+
+          <div class="receipt-placeholder" id="reg-placeholder">
+            <div class="placeholder-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 12h6M12 9v6"/></svg>
+            </div>
+            <p>Fill out the form and submit to generate the SHA-256 fingerprint, commit to Ethereum local ledger, and generate a dynamic QR pass.</p>
+          </div>
+
+          <div class="receipt-content hidden" id="reg-details">
+            <div class="receipt-field">
+              <span class="field-label">Certificate ID</span>
+              <span class="field-value mono font-semibold" id="res-cert-id">-</span>
+            </div>
+
+            <div class="receipt-field">
+              <span class="field-label">SHA-256 Digest</span>
+              <div class="copyable-box">
+                <span class="mono text-xs" id="res-cert-hash">-</span>
+                <button class="btn-icon" data-copy="res-cert-hash" title="Copy Hash">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="receipt-field">
+              <span class="field-label">Transaction Hash</span>
+              <div class="copyable-box">
+                <span class="mono text-xs text-cyan" id="res-tx-hash">-</span>
+                <button class="btn-icon" data-copy="res-tx-hash" title="Copy TX Hash">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-row mt-2">
+              <div class="receipt-field">
+                <span class="field-label">Block Number</span>
+                <span class="field-value mono text-green" id="res-block-num">-</span>
+              </div>
+              <div class="receipt-field">
+                <span class="field-label">Issuer Signer</span>
+                <span class="field-value mono text-xs" id="res-issuer-addr">-</span>
+              </div>
+            </div>
+
+            <!-- QR Preview -->
+            <div class="qr-container mt-4" id="reg-qr-section">
+              <div class="qr-preview-wrapper">
+                <img id="reg-qr-img" alt="Certificate QR Code" class="qr-image" />
+              </div>
+              <div class="qr-details">
+                <span class="qr-title">Instant Verification QR</span>
+                <p class="text-xs text-muted">Point any smartphone camera to inspect on-chain state.</p>
+                <a id="reg-qr-link" href="#" target="_blank" class="link-verify text-xs">Open Public Endpoint &rarr;</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Tab 2: Verify & Tamper Detection -->
+    <main class="tab-content hidden" id="pane-verify">
+      <div class="content-split">
+        <div class="card glass form-card">
+          <div class="card-header">
+            <div>
+              <h2>Verify Certificate Authenticity</h2>
+              <p class="card-subtitle">Recalculates the cryptographic hash from submitted fields and compares it against immutable on-chain records.</p>
+            </div>
+            <div class="btn-group">
+              <button type="button" class="btn-ghost" id="btn-fill-valid-verify">Load Valid Sample</button>
+              <button type="button" class="btn-ghost btn-danger-ghost" id="btn-fill-tampered-verify">Simulate Tamper</button>
+            </div>
+          </div>
+
+          <form id="form-verify">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ver-cert-id">Certificate ID *</label>
+                <input type="text" id="ver-cert-id" required placeholder="e.g. CERT-2026-001" />
+              </div>
+              <div class="form-group">
+                <label for="ver-issue-date">Issue Date *</label>
+                <input type="date" id="ver-issue-date" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="ver-student-name">Student Full Name *</label>
+              <input type="text" id="ver-student-name" required placeholder="e.g. Sayan Roy" />
+            </div>
+
+            <div class="form-group">
+              <label for="ver-course-name">Course / Credential Title *</label>
+              <input type="text" id="ver-course-name" required placeholder="e.g. Advanced Blockchain Architecture & Smart Contracts" />
+            </div>
+
+            <div class="form-group">
+              <label for="ver-issuer">Issuing Organization *</label>
+              <input type="text" id="ver-issuer" required placeholder="e.g. ProofPass Certification Authority" />
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-secondary" id="btn-submit-verify">
+                <span class="btn-spinner hidden" id="spinner-verify"></span>
+                <span class="btn-text">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  Run On-Chain Verification
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Verification Verdict Card -->
+        <div class="card glass result-card" id="ver-result-card">
+          <div class="card-header">
+            <h3>Verification Verdict</h3>
+            <span class="badge badge-idle" id="ver-badge">Awaiting Check</span>
+          </div>
+
+          <div class="receipt-placeholder" id="ver-placeholder">
+            <div class="placeholder-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <p>Enter certificate details to perform real-time cryptographic validation against the smart contract.</p>
+          </div>
+
+          <div class="verdict-content hidden" id="ver-details">
+            <!-- Verdict Hero Banner -->
+            <div class="verdict-banner" id="verdict-banner">
+              <div class="verdict-icon" id="verdict-icon"></div>
+              <div>
+                <h4 id="verdict-title">Status</h4>
+                <p id="verdict-desc" class="text-xs text-muted"></p>
+              </div>
+            </div>
+
+            <!-- Hash Comparison Box -->
+            <div class="comparison-box mt-3" id="hash-comparison-box">
+              <div class="comparison-item">
+                <div class="comparison-label">
+                  <span>Computed Submission Hash</span>
+                  <span class="badge-mini" id="hash-match-status">Checking</span>
+                </div>
+                <div class="mono text-xs comparison-hash" id="ver-submitted-hash">-</div>
+              </div>
+              <div class="comparison-divider">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+              </div>
+              <div class="comparison-item">
+                <div class="comparison-label">Smart Contract Stored Hash</div>
+                <div class="mono text-xs comparison-hash" id="ver-stored-hash">-</div>
+              </div>
+            </div>
+
+            <!-- Metadata List -->
+            <div class="metadata-grid mt-3">
+              <div class="meta-item">
+                <span class="field-label">On-Chain Issuer</span>
+                <span class="mono text-xs" id="ver-issuer-addr">-</span>
+              </div>
+              <div class="meta-item">
+                <span class="field-label">Issued At Timestamp</span>
+                <span class="text-xs" id="ver-timestamp">-</span>
+              </div>
+              <div class="meta-item">
+                <span class="field-label">Revocation Status</span>
+                <span class="text-xs font-semibold" id="ver-revoked-status">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Tab 3: Public Lookup & QR -->
+    <main class="tab-content hidden" id="pane-lookup">
+      <div class="content-split">
+        <div class="card glass form-card">
+          <div class="card-header">
+            <div>
+              <h2>Public Certificate Lookup</h2>
+              <p class="card-subtitle">Query the blockchain ledger directly by Certificate ID without requiring raw student details.</p>
+            </div>
+          </div>
+
+          <form id="form-lookup">
+            <div class="form-group">
+              <label for="lookup-cert-id">Certificate ID *</label>
+              <div class="input-with-button">
+                <input type="text" id="lookup-cert-id" required placeholder="e.g. CERT-2026-001" />
+                <button type="submit" class="btn btn-primary" id="btn-submit-lookup">
+                  <span class="btn-spinner hidden" id="spinner-lookup"></span>
+                  <span class="btn-text">Query Ledger</span>
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <div class="quick-pick mt-4">
+            <span class="text-xs text-muted">Recent Certificates:</span>
+            <div class="recent-chips-container" id="recent-chips">
+              <span class="text-xs text-muted italic">No recent certificates registered in this session</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card glass result-card" id="lookup-result-card">
+          <div class="card-header">
+            <h3>Public Record & QR Code</h3>
+            <span class="badge badge-idle" id="lookup-badge">Idle</span>
+          </div>
+
+          <div class="receipt-placeholder" id="lookup-placeholder">
+            <div class="placeholder-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <p>Search by certificate ID to inspect registration status and generate dynamic QR badges.</p>
+          </div>
+
+          <div class="lookup-content hidden" id="lookup-details">
+            <div class="receipt-field">
+              <span class="field-label">Status</span>
+              <span class="field-value font-semibold" id="lookup-status-text">-</span>
+            </div>
+            <div class="receipt-field">
+              <span class="field-label">Registered Issuer</span>
+              <span class="field-value mono text-xs" id="lookup-issuer-addr">-</span>
+            </div>
+            <div class="receipt-field">
+              <span class="field-label">Block Timestamp</span>
+              <span class="field-value text-xs" id="lookup-timestamp">-</span>
+            </div>
+
+            <!-- Dynamic QR Section -->
+            <div class="qr-container mt-4" id="lookup-qr-section">
+              <div class="qr-preview-wrapper">
+                <img id="lookup-qr-img" alt="QR Code" class="qr-image" />
+              </div>
+              <div class="qr-details">
+                <span class="qr-title">Direct Verification QR</span>
+                <p class="text-xs text-muted">Scan with phone to load instant verification on mobile.</p>
+                <a id="lookup-qr-link" href="#" target="_blank" class="link-verify text-xs">Open Endpoint &rarr;</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Tab 4: Revocation Management -->
+    <main class="tab-content hidden" id="pane-revoke">
+      <div class="content-split">
+        <div class="card glass form-card">
+          <div class="card-header">
+            <div>
+              <h2>Revoke Certificate</h2>
+              <p class="card-subtitle">Permanently mark a certificate as revoked on-chain. Only authorized issuer accounts can perform this action.</p>
+            </div>
+          </div>
+
+          <div class="warning-callout">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div>
+              <strong>Irreversible Blockchain Operation:</strong>
+              Once revoked, subsequent verification calls will flag this credential as <code>REVOKED</code> forever.
+            </div>
+          </div>
+
+          <form id="form-revoke" class="mt-4">
+            <div class="form-group">
+              <label for="revoke-cert-id">Certificate ID to Revoke *</label>
+              <input type="text" id="revoke-cert-id" required placeholder="e.g. CERT-2026-001" />
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-danger" id="btn-submit-revoke">
+                <span class="btn-spinner hidden" id="spinner-revoke"></span>
+                <span class="btn-text">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                  Execute On-Chain Revocation
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card glass result-card" id="revoke-result-card">
+          <div class="card-header">
+            <h3>Revocation Receipt</h3>
+            <span class="badge badge-idle" id="revoke-badge">Awaiting Action</span>
+          </div>
+
+          <div class="receipt-placeholder" id="revoke-placeholder">
+            <div class="placeholder-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            </div>
+            <p>Revocation transactions will produce an immutable event receipt here.</p>
+          </div>
+
+          <div class="receipt-content hidden" id="revoke-details">
+            <div class="receipt-field">
+              <span class="field-label">Status</span>
+              <span class="badge badge-revoked">REVOKED ON CHAIN</span>
+            </div>
+            <div class="receipt-field">
+              <span class="field-label">Certificate ID</span>
+              <span class="mono font-semibold" id="rev-cert-id">-</span>
+            </div>
+            <div class="receipt-field">
+              <span class="field-label">Revocation Transaction Hash</span>
+              <div class="copyable-box">
+                <span class="mono text-xs text-danger" id="rev-tx-hash">-</span>
+                <button class="btn-icon" data-copy="rev-tx-hash" title="Copy Hash">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="receipt-field">
+              <span class="field-label">Block Number</span>
+              <span class="field-value mono" id="rev-block-num">-</span>
+            </div>
+            <div class="receipt-field">
+              <span class="field-label">Revoked By</span>
+              <span class="field-value mono text-xs" id="rev-revoked-by">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Activity Log / Session History -->
+    <section class="activity-section">
+      <div class="activity-header">
+        <div class="activity-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
+          <h3>Session Activity Log</h3>
+        </div>
+        <button type="button" class="btn-ghost btn-xs" id="btn-clear-logs">Clear Log</button>
+      </div>
+
+      <div class="activity-table-wrapper">
+        <table class="activity-table" id="activity-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Action</th>
+              <th>Certificate ID</th>
+              <th>Status</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody id="activity-tbody">
+            <tr class="empty-row" id="empty-row">
+              <td colspan="5">No actions recorded in this session yet. Try registering or verifying a certificate above!</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>ProofPass Decentralized Credential Registry &bull; EVM Smart Contract: <code>0x5FbDB2315678afecb367f032d93F642f64180aa3</code></p>
+    </footer>
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+backend/.venv
+backend/venv
+backend/__pycache__
+backend/app/__pycache__
+blockchain/node_modules
+blockchain/cache
+blockchain/artifacts
+.git
+.DS_Store
+*.log
